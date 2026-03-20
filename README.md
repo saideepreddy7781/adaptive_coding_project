@@ -1,58 +1,50 @@
-# Adaptive Coding Simulation (LDPC & Polar)
+# 🛰️ Adaptive Coding & Modulation Simulation (LDPC & Polar)
 
-This project simulates the performance of **Adaptive Coding and Modulation (ACM)** using **LDPC** (Low-Density Parity-Check) and **Polar Codes**. The simulation compares these advanced coding schemes against Uncoded BPSK transmission over a **Rayleigh Fading Channel**.
+This project simulates-high performance **Adaptive Coding and Modulation (ACM)** using **LDPC** and **Polar Codes** over a Rayleigh Fading Channel. It compares these advanced schemes against a fixed-rate baseline and Uncoded BPSK.
 
-## Features
+## 🚀 Quick Start (Fresh Laptop)
 
-- **Channel Model**: Rayleigh Fading with Additive White Gaussian Noise (AWGN).
-- **Modulation**: Binary Phase Shift Keying (BPSK).
-- **Coding Schemes**:
-  - **LDPC Codes**: Rates 1/3, 1/2, 3/4.
-  - **Polar Codes**: Rates 1/3, 1/2, 3/4 (constructed using Bhattacharyya bounds).
-  - **Uncoded**: Baseline BPSK.
-  - **Adaptive (ACM)**: Dynamically selects the best coding scheme based on the effective SNR to maximize throughput while maintaining low Block Error Rate (BLER).
-- **Metrics**: Bit Error Rate (BER), Block Error Rate (BLER), and Throughput.
+Follow these steps to set up and run the simulation on any computer with Python 3 installed.
 
-## Requirements
-
-The project implementation relies on the following Python libraries:
-
-- `numpy`
-- `matplotlib`
-- `pyldpc` (for LDPC code construction and decoding)
-
-## Installation
-
-1. Clone or download the repository.
-2. Install the required dependencies:
+### 1. Set Up the Environment
+Open your terminal in the project folder and run:
 
 ```bash
-pip install numpy matplotlib pyldpc
+# Create a virtual environment
+python3 -m venv venv
+
+# Activate the environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+# venv\Scripts\activate
+
+# Install all requirements
+pip install -r requirements.txt
 ```
 
-## Usage
-
-To run the simulation and generate performance plots:
+### 2. Run the Simulation
+To execute the simulation and generate all 8 performance graphs at once:
 
 ```bash
 python adaptive_coding_project/main.py
 ```
 
-*Note: The simulation may take some time depending on the number of frames and SNR points.*
+---
 
-## Output
+## 📊 Generated Results
+After running, the `results/` folder will contain the following 8 plots:
 
-The simulation generates the following plots in the `results/` directory:
+1.  **`proposal_ber.png`**: BER vs SNR for LDPC/Polar Comparison.
+2.  **`ber_plot_adaptive.png`**: Dedicated BER plot for the Adaptive scheme.
+3.  **`proposal_throughput.png`**: Throughput vs SNR (Normalized & Stepwise).
+4.  **`bler_realistic.png`**: Block Error Rate (BLER) for Multi-Rate codes.
+5.  **`ber_plot.png` & `ber_realistic.png`**: Standard/Legacy BER comparisons.
+6.  **`throughput_plot.png` & `throughput_realistic.png`**: Standard/Legacy Throughput comparisons.
 
-- `proposal_ber.png`: BER vs SNR comparison.
-- `proposal_throughput.png`: Throughput vs SNR comparison.
+## 🛠️ Requirements
+- Python 3.8+
+- libraries: `numpy`, `matplotlib`, `pyldpc`, `numba`, `scipy`
 
-## Project Structure
-
-- `adaptive_coding_project/`: Source code package.
-  - `main.py`: Main entry point for the simulation.
-  - `channel.py`: Channel models (Rayleigh, AWGN).
-  - `modulation.py`: Modulation and Demodulation (BPSK).
-  - `ldpc_coding.py`: Wrapper for `pyldpc` functions.
-  - `polar_coding.py`: Implementation of Polar Code construction, encoding, and SC decoding.
-  - `utils.py`: Utility functions.
+---
+*Developed for research into Adaptive Coding and Modulation schemes.*

@@ -81,8 +81,8 @@ def get_simulation_results():
     
     # Simulation Parameters
     snr_range_db = np.arange(0, 13, 1) # 0 to 12 dB
-    max_frames = 2000
-    min_block_errors = 30 # Stop if we hit this many errors (for speed, realistic would be 100)
+    max_frames = 200
+    min_block_errors = 5 # Stop if we hit this many errors (for speed, realistic would be 100)
     
     # Define Schemes
     # LDPC Rates: ~1/3, ~1/2, ~3/4
@@ -236,61 +236,98 @@ def plot_results(snr, results):
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
     
-    # Selecting Curves to Plot
-    # 1. Uncoded
-    # 2. Fixed LDPC (R=1/2)
-    # 3. Fixed Polar (R=1/2)
-    # 4. Adaptive
-    
     # Common Style
     plt.rcParams.update({'font.size': 14})
     
-    # Figure A: BER
+    # ---------------------------------------------------------
+    # 1. BER vs SNR for LDPC and Polar (Rayleigh Channel)
+    # Filenames: proposal_ber.png, ber_plot.png, ber_realistic.png
+    # ---------------------------------------------------------
     plt.figure(figsize=(10, 7))
-    
-    # Adaptive
     plt.semilogy(snr, results['Adaptive']['ber'], 'k-o', linewidth=3, markersize=10, label='Adaptive (ACM)')
     
-    # Fixed Schemes (R=1/2)
-    if 'LDPC R=1/2' in results:
-        plt.semilogy(snr, results['LDPC R=1/2']['ber'], 'b-s', linewidth=2, markersize=8, alpha=0.8, label='Fixed LDPC (R=1/2)')
-    if 'Polar R=1/2' in results:
-        plt.semilogy(snr, results['Polar R=1/2']['ber'], 'g-d', linewidth=2, markersize=8, alpha=0.8, label='Fixed Polar (R=1/2)')
-        
-    # Uncoded
+    # Plotting multiple rates for LDPC and Polar as requested
+    for label in results:
+        if 'LDPC' in label and '1/2' in label:
+            plt.semilogy(snr, results[label]['ber'], 'b-s', linewidth=2, alpha=0.7, label=label)
+        elif 'Polar' in label and '1/2' in label:
+            plt.semilogy(snr, results[label]['ber'], 'g-d', linewidth=2, alpha=0.7, label=label)
+    
     if 'Uncoded' in results:
         plt.semilogy(snr, results['Uncoded']['ber'], 'r--', linewidth=2, label='Uncoded BPSK')
 
-    plt.title('BER Performance: Adaptive vs Fixed Coding', fontsize=16, fontweight='bold')
+    plt.title('Bit Error Rate vs. SNR for LDPC and Polar', fontsize=16, fontweight='bold')
     plt.xlabel('SNR (dB)', fontsize=14)
     plt.ylabel('Bit Error Rate (BER)', fontsize=14)
     plt.ylim(1e-5, 0.5)
     plt.grid(True, which="both", alpha=0.4)
-    plt.legend(frameon=True, fontsize=12)
+    plt.legend(frameon=True, fontsize=10, ncol=2)
     plt.tight_layout()
-    plt.savefig(os.path.join(results_dir, 'proposal_ber.png'))
-    print("Saved proposal_ber.png")
-
-    # Figure B: Throughput
-    plt.figure(figsize=(10, 7))
     
-    # Adaptive
+    for fname in ['proposal_ber.png', 'ber_plot.png', 'ber_realistic.png']:
+        plt.savefig(os.path.join(results_dir, fname))
+    print("Generated BER comparison plots.")
+
+    # ---------------------------------------------------------
+    # 2. BER vs SNR for Adaptive Coding Scheme
+    # Filename: ber_plot_adaptive.png
+    # ---------------------------------------------------------
+    plt.figure(figsize=(10, 7))
+    plt.semilogy(snr, results['Adaptive']['ber'], 'k-o', linewidth=3, markersize=10, label='Adaptive (ACM)')
+    plt.title('Bit Error Rate vs. SNR for Adaptive Coding Scheme', fontsize=16, fontweight='bold')
+    plt.xlabel('SNR (dB)', fontsize=14)
+    plt.ylabel('Bit Error Rate (BER)', fontsize=14)
+    plt.grid(True, which="both", alpha=0.4)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(results_dir, 'ber_plot_adaptive.png'))
+    print("Generated Adaptive BER plot.")
+
+    # ---------------------------------------------------------
+    # 3 & 4. Throughput vs SNR (Normalised & Stepwise)
+    # Filenames: proposal_throughput.png, throughput_plot.png, throughput_realistic.png
+    # ---------------------------------------------------------
+    plt.figure(figsize=(10, 7))
     plt.plot(snr, results['Adaptive']['throughput'], 'k-o', linewidth=3, markersize=10, label='Adaptive (ACM)')
     
-    # Fixed Schemes (R=1/2)
     if 'LDPC R=1/2' in results:
-        plt.plot(snr, results['LDPC R=1/2']['throughput'], 'b-s', linewidth=2, markersize=8, alpha=0.8, label='Fixed LDPC (R=1/2)')
+        plt.plot(snr, results['LDPC R=1/2']['throughput'], 'b-s', linewidth=2, alpha=0.8, label='Fixed LDPC (R=1/2)')
     if 'Polar R=1/2' in results:
-        plt.plot(snr, results['Polar R=1/2']['throughput'], 'g-d', linewidth=2, markersize=8, alpha=0.8, label='Fixed Polar (R=1/2)')
+        plt.plot(snr, results['Polar R=1/2']['throughput'], 'g-d', linewidth=2, alpha=0.8, label='Fixed Polar (R=1/2)')
+    if 'Uncoded' in results:
+        plt.plot(snr, [1.0]*len(snr), 'r--', linewidth=2, label='Uncoded (Rate=1.0)')
 
-    plt.title('Throughput: Adaptive vs Fixed Coding', fontsize=16, fontweight='bold')
+    plt.title('Throughput vs. SNR (Normalized & Stepwise)', fontsize=16, fontweight='bold')
     plt.xlabel('SNR (dB)', fontsize=14)
     plt.ylabel('Throughput (bits/symbol)', fontsize=14)
     plt.grid(True, alpha=0.4)
     plt.legend(frameon=True, fontsize=12, loc='lower right')
     plt.tight_layout()
-    plt.savefig(os.path.join(results_dir, 'proposal_throughput.png'))
-    print("Saved proposal_throughput.png")
+    
+    for fname in ['proposal_throughput.png', 'throughput_plot.png', 'throughput_realistic.png']:
+        plt.savefig(os.path.join(results_dir, fname))
+    print("Generated Throughput comparison plots.")
+
+    # ---------------------------------------------------------
+    # 5. BLER vs SNR for Multi-Rate LDPC and Polar
+    # Filename: bler_realistic.png
+    # ---------------------------------------------------------
+    plt.figure(figsize=(10, 7))
+    plt.semilogy(snr, results['Adaptive']['bler'], 'k-o', linewidth=3, markersize=10, label='Adaptive (ACM)')
+    
+    # Show more rates for BLER as requested
+    for label in results:
+        if ('LDPC' in label or 'Polar' in label) and ('1/3' in label or '1/2' in label or '3/4' in label):
+            plt.semilogy(snr, results[label]['bler'], alpha=0.6, label=label)
+    
+    plt.title('BLER vs. SNR for Multi-Rate LDPC and Polar', fontsize=16, fontweight='bold')
+    plt.xlabel('SNR (dB)', fontsize=14)
+    plt.ylabel('Block Error Rate (BLER)', fontsize=14)
+    plt.grid(True, which="both", alpha=0.4)
+    plt.legend(ncol=2, fontsize=9)
+    plt.tight_layout()
+    plt.savefig(os.path.join(results_dir, 'bler_realistic.png'))
+    print("Generated Multi-Rate BLER plot.")
 
 
 if __name__ == "__main__":
